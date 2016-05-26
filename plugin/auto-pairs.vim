@@ -116,6 +116,11 @@ function! AutoPairsInsert(key)
     return a:key
   end
 
+  " If |abc intput ', will not insert pair
+  if current_char =~ '\w'
+    return a:key
+  end
+
   " The key is difference open-pair, then it means only for ) ] } by default
   if !has_key(b:AutoPairs, a:key)
     let b:autopairs_saved_pair = [a:key, getpos('.')]
