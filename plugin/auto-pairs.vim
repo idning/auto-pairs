@@ -111,6 +111,7 @@ function! AutoPairsInsert(key)
     let eol = 1
   end
 
+
   " Ignore auto close if prev character is \
   if prev_char == '\'
     return a:key
@@ -118,6 +119,11 @@ function! AutoPairsInsert(key)
 
   " If |abc intput ', will not insert pair
   if current_char =~ '\w'
+    return a:key
+  end
+
+  " ning: ignore auto close if not in the end of line
+  if eol == 0
     return a:key
   end
 
@@ -133,11 +139,14 @@ function! AutoPairsInsert(key)
     if !g:AutoPairsFlyMode
       " Skip the character if next character is space
       if current_char == ' ' && next_char == a:key
+        "Decho("ff")
         return s:Right.s:Right
       end
 
+      "Decho("mm")
       " Skip the character if closed pair is next character
       if current_char == ''
+        "Decho("current ''")
         if g:AutoPairsMultilineClose
           let next_lineno = line('.')+1
           let next_line = getline(nextnonblank(next_lineno))
@@ -151,8 +160,10 @@ function! AutoPairsInsert(key)
       endif
     endif
 
+    "Decho("fly")
     " Fly Mode, and the key is closed-pairs, search closed-pair and jump
     if g:AutoPairsFlyMode && has_key(b:AutoPairsClosedPairs, a:key)
+      "Decho("fly")
       let n = stridx(after, a:key)
       if n != -1
         return repeat(s:Right, n+1)
@@ -166,6 +177,7 @@ function! AutoPairsInsert(key)
     " Insert directly if the key is not an open key
     return a:key
   end
+  "Decho("ww")
 
   let open = a:key
   let close = b:AutoPairs[open]
@@ -181,12 +193,13 @@ function! AutoPairsInsert(key)
   end
 
   " support for ''' ``` and """
+  " ning: skip them
   if open == close
     " The key must be ' " `
     let pprev_char = line[col('.')-3]
     if pprev_char == open && prev_char == open
       " Double pair found
-      return repeat(a:key, 4) . repeat(s:Left, 3)
+      return a:key
     end
   end
 
