@@ -39,6 +39,12 @@ function! AutoPairsInsert(key)
     return "\<Right>"
   end
 
+  " ning: Ignore auto close if not in end of line
+  if col(".") != col("$")
+    return a:key
+  end
+  
+
   " Input directly if the key is not an open key
   if !has_key(g:AutoPairs, a:key)
     return a:key
