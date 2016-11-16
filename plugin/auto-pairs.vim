@@ -62,7 +62,7 @@ endif
 " When skipping the closed pair, look at the current and
 " next line as well.
 if !exists('g:AutoPairsMultilineClose')
-  let g:AutoPairsMultilineClose = 1
+  let g:AutoPairsMultilineClose = 0
 endif
 
 " Work with Fly Mode, insert pair where jumped
@@ -71,7 +71,7 @@ if !exists('g:AutoPairsShortcutBackInsert')
 endif
 
 if !exists('g:AutoPairsSmartQuotes')
-  let g:AutoPairsSmartQuotes = 1
+  let g:AutoPairsSmartQuotes = 0
 endif
 
 " 7.4.849 support <C-G>U to avoid breaking '.'
@@ -107,7 +107,7 @@ function! AutoPairsInsert(key)
   let prev_char = get(prev_chars, -1, '')
 
   let eol = 0
-  if col('$') -  col('.') <= 1
+  if col('$') -  col('.') < 1     "ning changed 
     let eol = 1
   end
 
@@ -122,10 +122,6 @@ function! AutoPairsInsert(key)
     return a:key
   end
 
-  " ning: ignore auto close if not in the end of line
-  if eol == 0
-    return a:key
-  end
 
   " The key is difference open-pair, then it means only for ) ] } by default
   if !has_key(b:AutoPairs, a:key)
@@ -201,6 +197,11 @@ function! AutoPairsInsert(key)
       " Double pair found
       return a:key
     end
+  end
+  
+  " ning: ignore auto close if not in the end of line
+  if eol == 0
+    return a:key
   end
 
   let quotes_num = 0
