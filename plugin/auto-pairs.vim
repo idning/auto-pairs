@@ -11,58 +11,55 @@ if exists('g:AutoPairsLoaded') || &cp
 end
 let g:AutoPairsLoaded = 1
 
-" Shortcurs for 
-" <M-o> newline with indetation
-" <M-a> jump to of line
-" <M-n> jmup to next pairs
-if !exists('g:AutoPairsShortcuts')
-  let g:AutoPairsShortcuts = 1
-end
-
 if !exists('g:AutoPairs')
   let g:AutoPairs = {'(':')', '[':']', '{':'}',"'":"'",'"':'"'}
+
+  let g:OpenPairs = {'(':')', '[':']', '{':'}',"'":"'",'"':'"'}
+  let g:ClosePairs = {')':'(', ']':'[', '}':'{',"'":"'",'"':'"'}
+
+  let g:OpenBrackets= {'(':')', '[':']', '{':'}'}
+  let g:CloseBrackets= {')':'(', ']':'[', '}':'{'}
 end
 
+" comment ) ] }
+" comment ) ] }
 
 function! AutoPairsInsert(key)
   let line = getline('.')
   let prev_char = line[col('.')-2]
+  let pprev_char = line[col('.')-3]
   let current_char = line[col('.')-1]
 
-  " Ignore auto close if prev character is \
-  if prev_char == '\'
-    return a:key
+  " ning: not process unknown chars
+  "if !has_key(g:OpenPairs, a:key) && !has_key(g:ClosePairs, a:key)
+      "return a:key
+  "end
+
+  if has_key(g:OpenBrackets, a:key)  " open 
+      let open = a:key
+      let close = g:OpenPairs[open]
+      " ning: auto-pair if in end of line
+      if col(".") == col("$")
+          return open.close."\<Left>"
+      end
+
+      " input orig key
+      return a:key
   end
 
-  " Skip the character if current character is the same as input
-  if current_char == a:key
-    return "\<Right>"
+  if has_key(g:CloseBrackets, a:key)  " close
+      " Skip the character if current character is the same as input
+      if current_char == a:key && prev_char == g:ClosePairs[a:key]
+        return "\<Right>"
+      end
+
+      " input orig key
+      return a:key
   end
-
-  " ning: Ignore auto close if not in end of line
-  if col(".") != col("$")
-    return a:key
-  end
-  
-
-  " Input directly if the key is not an open key
-  if !has_key(g:AutoPairs, a:key)
-    return a:key
-  end
-
-  let open = a:key
-  let close = g:AutoPairs[open]
-
-
-  " Auto return only if open and close is same
-  if prev_char == open && open != close
-    return "\<CR>\<ESC>==O"
-  end
-
-  return open.close."\<Left>"
+  " ning: default skip:
+  return a:key
+  "return open.close."\<Left>"
 endfunction
-
-
 
 function! AutoPairsDelete()
   let line = getline('.')
@@ -99,13 +96,6 @@ function! AutoPairsInit()
     end
   endfor
   execute 'inoremap <silent> <BS> <C-R>=AutoPairsDelete()<CR>'
-
-  " If the keys map conflict with your own settings, delete or change them
-  if g:AutoPairsShortcuts
-    execute 'inoremap <silent> <M-n> <ESC>:call AutoPairsJump()<CR>a'
-    execute 'inoremap <silent> <M-a> <END>'
-    execute 'inoremap <silent> <M-o> <END><CR>'
-  end
 endfunction
 
 call AutoPairsInit()
