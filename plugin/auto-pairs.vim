@@ -29,6 +29,7 @@ function! AutoPairsInsert(key)
   let prev_char = line[col('.')-2]
   let pprev_char = line[col('.')-3]
   let current_char = line[col('.')-1]
+  let next_char = line[col('.')]
 
   " ning: not process unknown chars
   "if !has_key(g:OpenPairs, a:key) && !has_key(g:ClosePairs, a:key)
@@ -49,7 +50,7 @@ function! AutoPairsInsert(key)
 
   if has_key(g:CloseBrackets, a:key)  " close
       " Skip the character if current character is the same as input
-      if current_char == a:key && prev_char == g:ClosePairs[a:key]
+      if current_char == a:key && prev_char == g:ClosePairs[a:key] && next_char != a:key
         return "\<Right>"
       end
 
